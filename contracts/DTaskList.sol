@@ -12,6 +12,7 @@ contract DTaskList {
 	event TaskCreated(address creator, uint taskId, string content);
 	event TaskCompleted(address creator, uint taskId);
 	event TaskDeleted(address creator, uint taskId);
+	event TaskUpdated(address indexed creator, uint256 taskId, string content);
 
 	function createTask(string memory _content) public {
 		Task memory newTask = Task({ content: _content, isCompleted: false, creator: msg.sender });
@@ -39,5 +40,13 @@ contract DTaskList {
 		// 在更复杂的场景中，可能需要更复杂的数组管理逻辑
 		userTasks[msg.sender][_taskId].content = "";
 		emit TaskDeleted(msg.sender, _taskId);
+	}
+
+	function editTask(uint256 taskId, string memory newContent) public {
+		require(taskId < userTasks[msg.sender].length, "Task ID out of bounds.");
+		require(!userTasks[msg.sender][taskId].isCompleted, "Completed tasks cannot be edited.");
+		require(bytes(newContent).length > 0, "Content cannot be empty.");
+		userTasks[msg.sender][taskId].content = newContent;
+		emit TaskUpdated(msg.sender, taskId, newContent);
 	}
 }
